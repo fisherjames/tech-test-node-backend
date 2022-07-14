@@ -7,10 +7,9 @@ export interface CardSummary {
 export interface CardData {
     id: string
     title: string
-    size: string
-    availableSizes: Array<CardSize>
+    sizes: Array<CardSize>
     imageUrl: string
-    price: string
+    basePrice: number
     pages: Array<CardPage>
 }
 
@@ -23,7 +22,7 @@ export interface TemplateData {
 
 export interface Card {
     title: string
-    size: string
+    size?: string
     availableSizes: Array<CardSize>
     imageUrl: string
     price: string
