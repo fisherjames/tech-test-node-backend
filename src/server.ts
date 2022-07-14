@@ -14,7 +14,7 @@ const fetchData = async (URI) => {
   }
 }
 
-const getCardTemplate = async (card) => {
+const getCardTemplate = async (card: CardData) => {
   const templateId = card.pages[0].templateId;
   return await fetchData('templates.json').then((data: Array<TemplateData>) => {
     return data.find( ({ id }) => id === templateId)
