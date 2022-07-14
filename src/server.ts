@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as express from "express";
-import { CardData, CardSummary, TemplateData } from "./types";
+import { Card, CardData, TemplateData } from "./types";
 export const app = express()
 
 const fetchData = async (URI) => {
@@ -14,33 +14,48 @@ const fetchData = async (URI) => {
   }
 }
 
-const getCardTemplate = async (cardId) => {
-  const cardNumber = cardId.slice(4)
-  const templateId = `template${cardNumber}`
-  return fetchData('templates.json').then((data: Array<TemplateData>) => {
+const getCardTemplate = async (card) => {
+  const templateId = card.pages[0].templateId;
+  return await fetchData('templates.json').then((data: Array<TemplateData>) => {
     return data.find( ({ id }) => id === templateId)
+  })
+}
+
+const cardSummaryBuilder = async (card: CardData) =>  {
+  let template = await getCardTemplate(card)
+  return({
+      title: card.title,
+      imageUrl: template.imageUrl,
+      url: `cards/${card.id}`  
+  })
+}
+
+const cardBuilder = async (card: CardData): Promise<Card> => {
+  let template = await getCardTemplate(card)
+  return({
+    title: card.title,
+    // size: 'string',
+    availableSizes: card.sizes,
+    imageUrl: template.imageUrl,
+    price: `£${card.basePrice.toFixed(2)}`,
+    pages: card.pages
   })
 }
 
 app.set('json spaces', 2);
 
 app.get('/cards', async (req, res) => {
-  // respond with a list of cards
+  // respond with cards
+  const cardsData = await fetchData('cards.json')
+  const cards = await Promise.all(cardsData.map((card: CardData )=> cardSummaryBuilder(card)))
+  res.status(200).send(cards) 
 })
 
 app.get('/cards/:cardId/:sizeId?', async (req, res) => {
   // respond with card by id
-  fetchData('cards.json').then(async (data: Array<CardData>) => {
-    const { cardId } = req.params;
-    const template = await getCardTemplate(cardId);
-    const result = data.find( ({ id }) => id === cardId)
-    const card: CardSummary = {
-      title: result.title,
-      imageUrl: template.imageUrl,
-      url: `cards/${cardId}`
-    }
-    result === undefined ? 
-      res.status(404).send(null) : 
-      res.status(200).send(card)
-  })
+  const { cardId } = req.params;
+  const cardsData = await fetchData('cards.json')
+  const cardData = cardsData.find(card => card.id === cardId)
+  const card = await cardBuilder(cardData)
+  res.status(200).send(card) 
 })
