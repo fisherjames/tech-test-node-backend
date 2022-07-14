@@ -15,7 +15,6 @@ const fetchData = async (URI) => {
 }
 
 const getCardTemplate = async (templateId: string) => {
-  // const templateId = card.pages[0].templateId;
   return await fetchData('templates.json').then((data: Array<TemplateData>) => {
     return data.find( ({ id }) => id === templateId)
   })
@@ -34,7 +33,7 @@ const cardBuilder = async (card: CardData): Promise<Card> => {
   let template = await getCardTemplate(card.pages[0].templateId)
   return({
     title: card.title,
-    // size: 'string',
+    // size: 'string', TODO
     availableSizes: card.sizes,
     imageUrl: template.imageUrl,
     price: `£${card.basePrice.toFixed(2)}`,
