@@ -36,7 +36,5 @@ export interface CardSize {
 
 export interface CardPage {
     title: string
-    width: number
-    height: number
-    imageUrl: string
+    templateId: string
 }
